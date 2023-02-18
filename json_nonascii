@@ -1,0 +1,29 @@
+import json
+import unicodedata
+
+# Open the JSON file and load its contents
+with open('aisimp_embeddings22.json', 'r') as f:
+    data = json.load(f)
+
+# Define a function to recursively search for the "id" field and replace any non-ASCII characters
+def replace_non_ascii(obj):
+    if isinstance(obj, list):
+        for i in range(len(obj)):
+            obj[i] = replace_non_ascii(obj[i])
+        return obj
+    elif isinstance(obj, dict):
+        for key in obj:
+            obj[key] = replace_non_ascii(obj[key])
+            if key == "id":
+                # Replace non-ASCII characters with their closest ASCII equivalent
+                obj[key] = unicodedata.normalize('NFKD', obj[key]).encode('ascii', 'ignore').decode('ascii')
+        return obj
+    else:
+        return obj
+
+# Replace any non-ASCII characters in the "id" field
+data = replace_non_ascii(data)
+
+# Write the modified JSON data back to the file
+with open('data.json', 'w') as f:
+    json.dump(data, f)
